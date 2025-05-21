@@ -1,0 +1,7 @@
+digraph G {
+rankdir=LR;
+node [shape=box];
+n0 [label="30"];
+n0 -> n1;
+n1 [label="40"];
+}
