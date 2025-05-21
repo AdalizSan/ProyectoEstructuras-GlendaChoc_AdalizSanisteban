@@ -1,0 +1,7 @@
+estructura,operacion,valor
+pila,insertar,10
+pila,insertar,20
+pila,eliminar,
+cola,insertar,30
+cola,insertar,40
+cola,eliminar,
