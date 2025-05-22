@@ -1,47 +1,33 @@
 package com.visualizador.estructuras.service;
 
-import com.visualizador.estructuras.model.Operacion;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.*;
+import java.util.*;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-@Service
 public class CSVService {
 
-    public List<Operacion> procesarCSV(MultipartFile archivo) throws Exception {
-        List<Operacion> operaciones = new ArrayList<>();
+    private final PilaService pilaService = new PilaService();
+    private final ColaService colaService = new ColaService();
 
-        // Validar extensión del archivo
-        if (archivo == null || archivo.isEmpty()) {
-            throw new Exception("El archivo está vacío o no se ha enviado.");
-        }
+    public void procesarCSV(MultipartFile file) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()));
+        String linea;
+        int paso = 0;
+        br.readLine(); 
 
-        String nombreArchivo = archivo.getOriginalFilename();
-        if (nombreArchivo == null || !nombreArchivo.toLowerCase().endsWith(".csv")) {
-            throw new Exception("El archivo no tiene una extensión válida (.csv).");
-        }
+        while ((linea = br.readLine()) != null) {
+            String[] partes = linea.split(",");
+            if (partes.length >= 2) {
+                String estructura = partes[0].trim();
+                String operacion = partes[1].trim();
+                String valor = partes.length == 3 ? partes[2].trim() : "";
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(archivo.getInputStream()))) {
-            String linea;
-            int fila = 0;
-            while ((linea = br.readLine()) != null) {
-                fila++;
-                String[] datos = linea.split(",");
-                if (datos.length != 2) {
-                    throw new Exception("Formato inválido en la línea " + fila + ". Se esperaban 2 columnas.");
+                paso++;
+                switch (estructura.toLowerCase()) {
+                    case "pila" -> pilaService.procesar(operacion, valor, paso);
+                    case "cola" -> colaService.procesar(operacion, valor, paso);
                 }
-                operaciones.add(new Operacion(datos[0].trim(), datos[1].trim()));
             }
-        } catch (Exception e) {
-            throw new Exception("Error al leer el archivo CSV: " + e.getMessage());
         }
-
-        System.out.println("Archivo CSV procesado correctamente.");
-        return operaciones;
     }
 }
-
